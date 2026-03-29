@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AgendaJá - Sistema de Agendamentos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --brand:#0A6B4F;
+  --brand-l:#E6F5F0;
+  --brand-d:#064535;
+  --accent:#F5A623;
+  --bg:#F7F6F3;
+  --surface:#fff;
+  --text:#1A1A18;
+  --muted:#6B6B65;
+  --border:rgba(0,0,0,0.09);
+  --danger:#DC2626;
+  --danger-l:#FEF2F2;
+  --warn:#D97706;
+  --warn-l:#FFFBEB;
+  --r:14px;
+  --rs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+input,button,select,textarea{font-family:inherit}
+.page{display:none}
+.page.active{display:block}
+
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.auth-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:2.5rem;width:100%;max-width:400px}
+.logo{font-family:'DM Serif Display',serif;font-size:26px;color:var(--brand);margin-bottom:.2rem}
+.logo span{color:var(--accent)}
+.auth-sub{font-size:14px;color:var(--muted);margin-bottom:1.75rem}
+.fld{margin-bottom:.85rem}
+.fld label{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:4px}
+.fld input,.fld select,.fld textarea{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--rs);font-size:14px;background:var(--bg);color:var(--text);outline:none;transition:border .15s}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--brand)}
+.btn{padding:10px 18px;border-radius:var(--rs);font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-p{background:var(--brand);color:#fff}
+.btn-p:hover{background:var(--brand-d)}
+.btn-o{background:transparent;border:1.5px solid var(--border);color:var(--text)}
+.btn-o:hover{border-color:var(--brand);color:var(--brand)}
+.btn-a{background:var(--accent);color:#1A1A18}
+.btn-a:hover{filter:brightness(.92)}
+.btn-w{background:#25D366;color:#fff}
+.btn-w:hover{background:#1ebe5d}
+.btn-d{background:var(--danger);color:#fff}
+.btn-d:hover{filter:brightness(.9)}
+.btn-full{width:100%;justify-content:center}
+.btn-sm{padding:6px 12px;font-size:12px}
+.err{background:var(--danger-l);color:var(--danger);font-size:13px;padding:9px 12px;border-radius:var(--rs);margin-bottom:.75rem;display:none}
+.err.show{display:block}
+.sw{text-align:center;font-size:13px;color:var(--muted);margin-top:1.25rem}
+.sw a{color:var(--brand);cursor:pointer}
+
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:58px;position:sticky;top:0;z-index:50}
+.nl a{font-size:13px;color:var(--muted);cursor:pointer;padding:4px 0;border-bottom:2px solid transparent;transition:all .15s;text-decoration:none;margin-right:1.25rem}
+.nl a.on,.nl a:hover{color:var(--brand);border-bottom-color:var(--brand)}
+.nr{display:flex;align-items:center;gap:8px}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--brand-l);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--brand)}
+.bplan{font-size:11px;font-weight:600;padding:3px 9px;border-radius:100px}
+.bp-free{background:#F3F4F6;color:#6B7280}
+.bp-pro{background:var(--brand-l);color:var(--brand-d)}
+.bp-biz{background:#EDE9FE;color:#4C1D95}
+.bp-admin{background:#FEF3C7;color:#92400E}
+
+.layout{display:grid;grid-template-columns:210px 1fr;min-height:calc(100vh - 58px)}
+.sb{background:var(--surface);border-right:1px solid var(--border);padding:1.25rem .75rem;display:flex;flex-direction:column}
+.si{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:var(--rs);font-size:13px;color:var(--muted);cursor:pointer;transition:all .15s;margin-bottom:2px}
+.si:hover{background:var(--bg);color:var(--text)}
+.si.on{background:var(--brand-l);color:var(--brand);font-weight:500}
+.si.disabled{opacity:.4;pointer-events:none;cursor:not-allowed}
+.main{padding:1.75rem;background:var(--bg)}
+
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:18px 22px;margin-bottom:14px}
+.ct{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.mgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-bottom:18px}
+.met{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:16px 18px}
+.ml{font-size:12px;color:var(--muted);margin-bottom:4px}
+.mv{font-size:22px;font-weight:600}
+.ms{font-size:11px;color:var(--brand);margin-top:2px}
+
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:8px 11px;text-align:left;border-bottom:1px solid var(--border)}
+td{font-size:13px;padding:11px 11px;border-bottom:1px solid var(--border);color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg)}
+.st{font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px}
+.s-ok{background:#D1FAE5;color:#065F46}
+.s-pend{background:#FEF3C7;color:#92400E}
+.s-can{background:var(--danger-l);color:var(--danger)}
+.s-free{background:#F3F4F6;color:#6B7280}
+
+.lbox{display:flex;align-items:center;gap:9px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--rs);padding:9px 13px}
+.lt{flex:1;font-size:12px;font-family:monospace;color:var(--brand)}
+
+.pw-bg{background:rgba(0,0,0,0.65);position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:1rem}
+.pw-card{background:var(--surface);border-radius:var(--r);padding:2rem;width:100%;max-width:440px;text-align:center}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:1.25rem}
+.popt{border:1.5px solid var(--border);border-radius:var(--rs);padding:12px 8px;cursor:pointer;transition:all .15s;text-align:center}
+.popt:hover,.popt.sel{border-color:var(--brand);background:var(--brand-l)}
+.pn{font-size:13px;font-weight:600;margin-bottom:2px}
+.pp{font-size:12px;color:var(--muted)}
+
+.lock-banner{background:var(--warn-l);border:1px solid #FDE68A;border-radius:var(--rs);padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--warn)}
+.lock-banner svg{flex-shrink:0}
+
+.feat-tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 7px;border-radius:100px;margin:2px}
+.ft-free{background:#F3F4F6;color:#6B7280}
+.ft-pro{background:var(--brand-l);color:var(--brand-d)}
+.ft-biz{background:#EDE9FE;color:#4C1D95}
+
+.bk-wrap{max-width:500px;margin:2.5rem auto;padding:0 1rem}
+.bk-hdr{background:var(--brand);border-radius:var(--r) var(--r) 0 0;padding:22px;color:#fff}
+.bk-body{background:var(--surface);border-radius:0 0 var(--r) var(--r);border:1px solid var(--border);border-top:none;padding:22px}
+.so{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border:1.5px solid var(--border);border-radius:var(--rs);cursor:pointer;transition:all .15s;margin-bottom:7px}
+.so:hover,.so.sel{border-color:var(--brand);background:var(--brand-l)}
+.tgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px}
+.to{padding:9px;text-align:center;border:1.5px solid var(--border);border-radius:var(--rs);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.to:hover,.to.sel{border-color:var(--brand);background:var(--brand-l);color:var(--brand)}
+.to.tk{opacity:.35;pointer-events:none}
+.sbar{display:flex;gap:4px;margin-bottom:18px}
+.ss{flex:1;height:3px;border-radius:2px;background:var(--border)}
+.ss.dn{background:var(--brand)}
+
+.price-card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:22px}
+.price-card.pop{border:2px solid var(--brand)}
+
+.toast{position:fixed;bottom:22px;right:22px;background:var(--text);color:#fff;padding:12px 18px;border-radius:var(--rs);font-size:13px;font-weight:500;transform:translateY(70px);opacity:0;transition:all .3s;z-index:300}
+.toast.show{transform:translateY(0);opacity:1}
+
+.admin-badge{background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;margin-left:6px}
+.color-preview{width:40px;height:40px;border-radius:var(--rs);border:2px solid var(--border);cursor:pointer}
+.logo-preview{width:60px;height:60px;border-radius:var(--r);object-fit:cover;border:1px solid var(--border)}
+.edit-group{background:var(--bg);padding:15px;border-radius:var(--rs);margin-bottom:15px}
+
+@media(max-width:700px){.layout{grid-template-columns:1fr}.sb{display:none}.mgrid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="page-login" class="page active">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="logo">Agenda<span>Já</span></div>
+      <div class="auth-sub">Entra na tua conta</div>
+      <div class="err" id="lerr">Email ou senha incorrectos.</div>
+      <div class="fld"><label>Email</label><input id="le" type="email" value="agendeja@gmail.com"/></div>
+      <div class="fld"><label>Senha</label><input id="lp" type="password" value="Goddid"/></div>
+      <button class="btn btn-p btn-full" style="margin-top:.5rem" onclick="doLogin()">Entrar</button>
+      <div class="sw">Sem conta? <a onclick="showPage('register')">Regista a tua empresa</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div id="page-register" class="page">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="logo">Agenda<span>Já</span></div>
+      <div class="auth-sub">Cria a conta da tua empresa</div>
+      <div class="err" id="rerr">Preenche todos os campos.</div>
+      <div class="fld"><label>Nome da empresa</label><input id="rn" placeholder="Ex: Barbearia do João"/></div>
+      <div class="fld"><label>Sector</label>
+        <select id="rsec">
+          <option value="barbearia">Barbearia / Salão</option>
+          <option value="clinica">Clínica / Saúde</option>
+          <option value="advocacia">Advocacia / Consultoria</option>
+          <option value="educacao">Educação / Aulas</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+      <div class="fld"><label>Email</label><input id="re" type="email" placeholder="empresa@email.com"/></div>
+      <div class="fld"><label>WhatsApp</label><input id="rph" placeholder="+258 84 000 0000"/></div>
+      <div class="fld"><label>Endereço</label><input id="raddr" placeholder="Endereço da empresa"/></div>
+      <div class="fld"><label>Senha</label><input id="rp" type="password" placeholder="Mínimo 6 caracteres"/></div>
+      <button class="btn btn-p btn-full" style="margin-top:.5rem" onclick="doRegister()">Criar conta grátis</button>
+      <div class="sw">Já tens conta? <a onclick="showPage('login')">Entrar</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="page-app" class="page">
+  <nav style="background:var(--surface)" id="app-nav">
+    <div style="display:flex;align-items:center;gap:2rem">
+      <div class="logo" style="font-size:20px" id="app-logo">Agenda<span>Já</span></div>
+      <div class="nl" id="nav-links"></div>
+    </div>
+    <div class="nr">
+      <span class="bplan" id="nbadge">Grátis</span>
+      <div class="avatar" id="nav-av">--</div>
+      <button class="btn btn-o btn-sm" onclick="logout()">Sair</button>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <div class="sb" id="app-sidebar" style="background:var(--surface)">
+      <div id="sb-items"></div>
+      <div style="margin-top:auto;padding-top:1rem;border-top:1px solid var(--border)">
+        <div id="sb-cname" style="font-size:13px;font-weight:600;padding:0 11px;color:var(--text)"></div>
+        <div id="sb-cplan" style="font-size:11px;color:var(--muted);padding:2px 11px"></div>
+      </div>
+    </div>
+    <div class="main" id="main-area" style="background:var(--bg)"></div>
+  </div>
+
+  <!-- PAYMENT WALL -->
+  <div id="paywall" style="display:none">
+    <div class="pw-bg">
+      <div class="pw-card">
+        <div style="font-size:32px;margin-bottom:.75rem">🔒</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:.5rem">Activa a tua conta</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:1.25rem;line-height:1.6">
+          Conta criada! Escolhe um plano e contacta-nos pelo WhatsApp para activar.<br>
+          <strong style="color:var(--text)">Plano Grátis:</strong> activa automaticamente mas com funções muito limitadas.
+        </div>
+        <div class="pgrid">
+          <div class="popt sel" id="pw-b" onclick="selWall(this,'basico')">
+            <div class="pn">Básico</div><div class="pp">Grátis</div>
+          </div>
+          <div class="popt" id="pw-p" onclick="selWall(this,'pro')">
+            <div class="pn">Pro</div><div class="pp">750 MT/mês</div>
+          </div>
+          <div class="popt" id="pw-bz" onclick="selWall(this,'business')">
+            <div class="pn">Business</div><div class="pp">1.500 MT/mês</div>
+          </div>
+        </div>
+        <button class="btn btn-w btn-full" id="pw-btn" style="font-size:14px" onclick="payViaWA()">
+          Activar conta grátis
+        </button>
+        <div style="font-size:12px;color:var(--muted);margin-top:10px">Planos pagos: envias mensagem ao nosso WhatsApp. Activação em minutos.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOOKING PAGE (cliente) -->
+<div id="page-booking" class="page">
+  <div style="background:var(--bg);min-height:100vh;padding:2rem 1rem" id="booking-bg">
+    <div class="bk-wrap">
+      <div id="bks1">
+        <div class="bk-hdr" id="booking-header" style="background:var(--brand)">
+          <div style="font-size:18px;font-weight:600;margin-bottom:3px" id="bkn">—</div>
+          <div style="font-size:13px;opacity:.8">Agende o seu horário online</div>
+        </div>
+        <div class="bk-body">
+          <div class="sbar"><div class="ss dn"></div><div class="ss"></div><div class="ss"></div></div>
+          <div style="font-size:14px;font-weight:500;margin-bottom:10px">Escolhe o serviço</div>
+          <div id="bk-svcs"></div>
+          <button class="btn btn-p btn-full" style="margin-top:4px" onclick="bkGo(2)">Continuar →</button>
+        </div>
+      </div>
+      <div id="bks2" style="display:none">
+        <div class="bk-hdr" id="booking-header2" style="background:var(--brand)">
+          <div style="font-size:18px;font-weight:600;margin-bottom:3px" id="bkn2">—</div>
+          <div style="font-size:13px;opacity:.8">Data e hora</div>
+        </div>
+        <div class="bk-body">
+          <div class="sbar"><div class="ss dn"></div><div class="ss dn"></div><div class="ss"></div></div>
+          <div class="fld" style="margin-bottom:12px"><label>Data</label><input type="date" id="bk-date"/></div>
+          <div style="font-size:13px;font-weight:500;margin-bottom:9px">Horários disponíveis</div>
+          <div class="tgrid">
+            <div class="to" onclick="bkTime(this)">08:00</div>
+            <div class="to" onclick="bkTime(this)">09:00</div>
+            <div class="to" onclick="bkTime(this)">10:00</div>
+            <div class="to" onclick="bkTime(this)">11:00</div>
+            <div class="to" onclick="bkTime(this)">13:00</div>
+            <div class="to" onclick="bkTime(this)">14:00</div>
+            <div class="to" onclick="bkTime(this)">15:00</div>
+            <div class="to" onclick="bkTime(this)">16:00</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-o" onclick="bkGo(1)">← Voltar</button>
+            <button class="btn btn-p" style="flex:1;justify-content:center" onclick="bkGo(3)">Continuar →</button>
+          </div>
+        </div>
+      </div>
+      <div id="bks3" style="display:none">
+        <div class="bk-hdr" id="booking-header3" style="background:var(--brand)">
+          <div style="font-size:18px;font-weight:600;margin-bottom:3px" id="bkn3">—</div>
+          <div style="font-size:13px;opacity:.8">Os teus dados</div>
+        </div>
+        <div class="bk-body">
+          <div class="sbar"><div class="ss dn"></div><div class="ss dn"></div><div class="ss dn"></div></div>
+          <div class="fld"><label>Nome</label><input id="bk-nm" placeholder="O teu nome completo"/></div>
+          <div class="fld"><label>WhatsApp</label><input id="bk-ph" placeholder="+258 84 000 0000"/></div>
+          <div style="background:var(--brand-l);border-radius:var(--rs);padding:9px 12px;font-size:13px;color:var(--brand);margin-bottom:13px">Receberás confirmação no WhatsApp.</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-o" onclick="bkGo(2)">← Voltar</button>
+            <button class="btn btn-p" style="flex:1;justify-content:center" onclick="bkConfirm()">Confirmar ✓</button>
+          </div>
+        </div>
+      </div>
+      <div id="bk-ok" style="display:none">
+        <div style="background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:2rem;text-align:center">
+          <div style="width:60px;height:60px;border-radius:50%;background:var(--brand-l);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:24px">✓</div>
+          <div style="font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:.4rem">Confirmado!</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:1.25rem">Vai receber confirmação no WhatsApp.</div>
+          <button class="btn btn-o btn-full" onclick="bkGo(1)">Fazer outro agendamento</button>
+          <button class="btn btn-o btn-full" style="margin-top:8px" onclick="showPage('login')">Voltar ao início</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// CONSTANTS & STORAGE
+// ═══════════════════════════════════════════
+const SK='aja_sess', UK='aja_users', AK='aja_appts';
+
+const PLANS = {
+  basico: {
+    label:'Básico', price:'Grátis', color:'bp-free',
+    features:['Página de agendamento','Até 10 agendamentos/mês','1 serviço'],
+    locked:['WhatsApp automático','Lembretes 24h','Relatórios','Múltiplos serviços','Cancelamentos','Ver histórico','Exportar dados','M-Pesa','Múltiplos funcionários','Estatísticas avançadas']
+  },
+  pro: {
+    label:'Pro', price:'750 MT/mês', color:'bp-pro',
+    features:['Agendamentos ilimitados','Até 5 serviços','WhatsApp automático','Lembretes 24h','Cancelar/remarcar','Ver histórico completo','Relatórios básicos'],
+    locked:['M-Pesa integrado','Múltiplos funcionários','Estatísticas avançadas','Exportar dados','API de integração']
+  },
+  business: {
+    label:'Business', price:'1.500 MT/mês', color:'bp-biz',
+    features:['Tudo ilimitado','Serviços ilimitados','WhatsApp automático','Lembretes 24h','Cancelar/remarcar','Histórico completo','Relatórios avançados','M-Pesa integrado','Múltiplos funcionários','Estatísticas avançadas','Exportar dados','API de integração'],
+    locked:[]
+  }
+};
+
+const ADMIN_ACC = {
+  email:'agendeja@gmail.com', pass:'Goddid',
+  name:'AgendaJá Admin', plan:'admin', paid:true,
+  slug:'admin', isAdmin:true,
+  services:[{id:1,name:'Consultoria',price:1000,dur:60}],
+  brandColor:'#0A6B4F', accentColor:'#F5A623', logo:null, address:''
+};
+
+const gs = () => { try{return JSON.parse(localStorage.getItem(SK)||'null')}catch{return null} };
+const ss = v => localStorage.setItem(SK, JSON.stringify(v));
+const gu = () => { try{return JSON.parse(localStorage.getItem(UK)||'[]')}catch{return[]} };
+const su = v => localStorage.setItem(UK, JSON.stringify(v));
+const ga = () => { try{return JSON.parse(localStorage.getItem(AK)||'[]')}catch{return[]} };
+const sa = v => localStorage.setItem(AK, JSON.stringify(v));
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════
+function doLogin(){
+  const e = document.getElementById('le').value.trim();
+  const p = document.getElementById('lp').value;
+  const err = document.getElementById('lerr');
+  err.classList.remove('show');
+
+  if(e === ADMIN_ACC.email && p === ADMIN_ACC.pass){
+    ss({...ADMIN_ACC}); loadApp(); return;
+  }
+  const u = gu().find(x => x.email===e && x.pass===p);
+  if(!u){ err.classList.add('show'); return; }
+  ss({...u}); loadApp();
+}
+
+function doRegister(){
+  const n  = document.getElementById('rn').value.trim();
+  const sec= document.getElementById('rsec').value;
+  const e  = document.getElementById('re').value.trim();
+  const ph = document.getElementById('rph').value.trim();
+  const addr = document.getElementById('raddr').value.trim();
+  const p  = document.getElementById('rp').value;
+  const err= document.getElementById('rerr');
+  err.classList.remove('show');
+  if(!n||!e||!ph||!p){ err.classList.add('show'); return; }
+  const us = gu();
+  if(us.find(u=>u.email===e)){
+    err.textContent='Email já registado.'; err.classList.add('show'); return;
+  }
+  const slug = n.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+  const nu = {
+    email:e, pass:p, name:n, sector:sec, phone:ph, address:addr,
+    plan:'basico', paid:false, slug,
+    services:[{id:1,name:'Serviço principal',price:300,dur:30}],
+    createdAt: new Date().toISOString(),
+    brandColor:'#0A6B4F', accentColor:'#F5A623', logo:null
+  };
+  us.push(nu); su(us); ss({...nu}); loadApp();
+}
+
+function logout(){
+  localStorage.removeItem(SK);
+  if(wallTimer){ clearInterval(wallTimer); wallTimer=null; }
+  showPage('login');
+}
+
+// ═══════════════════════════════════════════
+// APP LOADER
+// ═══════════════════════════════════════════
+let wallTimer = null;
+
+function applyBrandColors(s){
+  if(!s || s.isAdmin) return;
+  const brandColor = s.brandColor || '#0A6B4F';
+  const accentColor = s.accentColor || '#F5A623';
+  document.documentElement.style.setProperty('--brand', brandColor);
+  document.documentElement.style.setProperty('--accent', accentColor);
+  const brandLight = brandColor + '20';
+  document.documentElement.style.setProperty('--brand-l', brandLight);
+}
+
+function loadApp(){
+  const s = gs();
+  if(!s){ showPage('login'); return; }
+  showPage('app');
+  applyBrandColors(s);
+  
+  if(s.logo){
+    document.getElementById('app-logo').innerHTML = `<img src="${s.logo}" style="height:32px;width:auto"/>`;
+  } else {
+    document.getElementById('app-logo').innerHTML = 'Agenda<span>Já</span>';
+  }
+
+  const ini = s.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('nav-av').textContent = ini;
+
+  const nb = document.getElementById('nbadge');
+  if(s.isAdmin){
+    nb.textContent='Admin'; nb.className='bplan bp-admin';
+  } else {
+    const pl = PLANS[s.plan]||PLANS.basico;
+    nb.textContent = pl.label; nb.className='bplan '+pl.color;
+  }
+
+  document.getElementById('sb-cname').textContent = s.name;
+  document.getElementById('sb-cplan').textContent = s.isAdmin ? 'Administrador' : (PLANS[s.plan]||PLANS.basico).label;
+
+  if(s.isAdmin){ buildAdminUI(); }
+  else { buildClientUI(s); }
+}
+
+// ═══════════════════════════════════════════
+// ADMIN UI
+// ═══════════════════════════════════════════
+function buildAdminUI(){
+  document.getElementById('nav-links').innerHTML =
+    `<a class="on" id="na-users" onclick="adminSec('users')">Utilizadores</a>
+     <a id="na-allAppts" onclick="adminSec('allAppts')">Todos os agendamentos</a>
+     <a id="na-stats" onclick="adminSec('stats')">Estatísticas</a>`;
+
+  document.getElementById('sb-items').innerHTML =
+    `<div class="si on" id="sb-users" onclick="adminSec('users')">
+       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6" cy="5" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M1 13c0-2.761 2.239-5 5-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M9.5 15.5c0-1.381 1.119-2.5 2.5-2.5s2.5 1.119 2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+       Utilizadores
+     </div>
+     <div class="si" id="sb-allAppts" onclick="adminSec('allAppts')">
+       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 1v3M11 1v3M1.5 6h13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+       Agendamentos
+     </div>
+     <div class="si" id="sb-stats" onclick="adminSec('stats')">
+       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+       Estatísticas
+     </div>`;
+
+  adminSec('users');
+}
+
+function adminSec(id){
+  ['users','allAppts','stats'].forEach(s=>{
+    const na=document.getElementById('na-'+s);
+    const sb=document.getElementById('sb-'+s);
+    if(na) na.classList.toggle('on', s===id);
+    if(sb) sb.classList.toggle('on', s===id);
+  });
+
+  const m = document.getElementById('main-area');
+
+  if(id==='users'){
+    const users = gu();
+    const appts = ga();
+    const rows = users.length === 0
+      ? `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:2rem">Nenhum utilizador registado ainda.</td> </tr>`
+      : users.map(u => {
+          const uAppts = appts.filter(a=>a.slug===u.slug).length;
+          const plan = PLANS[u.plan]||PLANS.basico;
+          return `<tr>
+            <td><div style="font-weight:500">${u.name}</div><div style="font-size:11px;color:var(--muted)">${u.email}</div> </tr>
+            <td><span style="font-size:11px;color:var(--muted)">${u.sector||'—'}</span> </tr>
+            <td>${u.phone||'—'} </tr>
+            <td><span class="st ${u.paid?'s-ok':'s-free'}">${u.paid?'Activo':'Pendente'}</span> </tr>
+            <td><span class="bplan ${plan.color}" style="font-size:11px">${plan.label}</span> </tr>
+            <td style="text-align:center">${uAppts} </tr>
+            <td><code style="font-size:11px;background:var(--bg);padding:2px 6px;border-radius:4px">${u.pass}</code> </tr>
+            <td>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <select onchange="adminSetPlan('${u.email}',this.value)" style="padding:4px 8px;border-radius:var(--rs);border:1px solid var(--border);font-size:12px;background:var(--bg);cursor:pointer">
+                  <option value="" disabled selected>Alterar plano</option>
+                  <option value="basico" ${u.plan==='basico'?'selected':''}> Básico (Grátis)</option>
+                  <option value="pro" ${u.plan==='pro'?'selected':''}>Pro (750 MT)</option>
+                  <option value="business" ${u.plan==='business'?'selected':''}>Business (1.500 MT)</option>
+                </select>
+                ${!u.paid ? `<button class="btn btn-p btn-sm" onclick="adminActivate('${u.email}')">Activar</button>` : `<button class="btn btn-o btn-sm" onclick="adminDeactivate('${u.email}')">Suspender</button>`}
+              </div>
+             </tr>
+           </tr>`;
+        }).join('');
+
+    m.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+        <div style="font-size:20px;font-weight:600">Utilizadores <span class="admin-badge">${users.length} registados</span></div>
+      </div>
+      <div class="mgrid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+        <div class="met"><div class="ml">Total registados</div><div class="mv">${users.length}</div></div>
+        <div class="met"><div class="ml">Contas activas</div><div class="mv">${users.filter(u=>u.paid).length}</div><div class="ms">pagaram</div></div>
+        <div class="met"><div class="ml">Pendentes</div><div class="mv">${users.filter(u=>!u.paid).length}</div><div class="ms">sem pagamento</div></div>
+      </div>
+      <div class="card">
+        <div class="ct">Todos os utilizadores</div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Empresa</th><th>Sector</th><th>Telefone</th><th>Estado</th><th>Plano</th><th>Marcações</th><th>Senha</th><th>Acções</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  }
+
+  else if(id==='allAppts'){
+    const appts = ga().slice().reverse();
+    const users = gu();
+    const rows = appts.length === 0
+      ? `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Nenhuma marcação ainda.</td></tr>`
+      : appts.map(a => {
+          const u = users.find(x=>x.slug===a.slug);
+          return `<tr>
+            <td><div style="font-weight:500">${a.clientName||'—'}</div><div style="font-size:11px;color:var(--muted)">${a.clientPhone||''}</div></td>
+            <td>${u?u.name:'—'}</td>
+            <td>${a.date||'—'}</td>
+            <td>${a.time||'—'}</td>
+            <td>${a.service||'—'}</td>
+            <td>${a.price?a.price+' MT':'—'}</td>
+            <td><span class="st ${a.status==='confirmado'?'s-ok':a.status==='cancelado'?'s-can':'s-pend'}">${a.status||'pendente'}</span></td>
+          </tr>`;
+        }).join('');
+
+    m.innerHTML = `
+      <div style="font-size:20px;font-weight:600;margin-bottom:1.5rem">Todos os agendamentos <span class="admin-badge">${appts.length} total</span></div>
+      <div class="card">
+        <div class="ct">Marcações de todas as empresas</div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Cliente</th><th>Empresa</th><th>Data</th><th>Hora</th><th>Serviço</th><th>Valor</th><th>Estado</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  }
+
+  else if(id==='stats'){
+    const users = gu();
+    const appts = ga();
+    const planCounts = {basico:0,pro:0,business:0};
+    users.forEach(u=>{ if(planCounts[u.plan]!==undefined) planCounts[u.plan]++; });
+    const revenue = users.filter(u=>u.plan==='pro'&&u.paid).length*750 + users.filter(u=>u.plan==='business'&&u.paid).length*1500;
+
+    m.innerHTML = `
+      <div style="font-size:20px;font-weight:600;margin-bottom:1.5rem">Estatísticas gerais</div>
+      <div class="mgrid">
+        <div class="met"><div class="ml">Total empresas</div><div class="mv">${users.length}</div></div>
+        <div class="met"><div class="ml">Activas (pagas)</div><div class="mv">${users.filter(u=>u.paid).length}</div></div>
+        <div class="met"><div class="ml">Total marcações</div><div class="mv">${appts.length}</div></div>
+        <div class="met"><div class="ml">Receita mensal est.</div><div class="mv">${revenue.toLocaleString()} MT</div></div>
+      </div>
+      <div class="card">
+        <div class="ct">Distribuição por plano</div>
+        ${['basico','pro','business'].map(pl=>{
+          const cnt = planCounts[pl];
+          const total = users.length||1;
+          const pct = Math.round(cnt/total*100);
+          const P = PLANS[pl];
+          return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <span class="bplan ${P.color}" style="min-width:70px;text-align:center">${P.label}</span>
+            <div style="flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden">
+              <div style="height:100%;background:var(--brand);border-radius:4px;width:${pct}%;transition:width .5s"></div>
+            </div>
+            <span style="font-size:13px;font-weight:600;min-width:30px">${cnt}</span>
+            <span style="font-size:12px;color:var(--muted);min-width:32px">${pct}%</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+  }
+}
+
+function adminSetPlan(email, plan){
+  if(!plan) return;
+  const us = gu();
+  const i = us.findIndex(u=>u.email===email);
+  if(i<0) return;
+  us[i].plan = plan;
+  su(us);
+  toast('Plano de '+us[i].name+' alterado para '+PLANS[plan].label+'!');
+  adminSec('users');
+}
+
+function adminActivate(email){
+  const us = gu();
+  const i = us.findIndex(u=>u.email===email);
+  if(i<0) return;
+  us[i].paid = true;
+  su(us);
+  toast(us[i].name+' activado!');
+  adminSec('users');
+}
+
+function adminDeactivate(email){
+  const us = gu();
+  const i = us.findIndex(u=>u.email===email);
+  if(i<0) return;
+  us[i].paid = false;
+  su(us);
+  toast(us[i].name+' suspenso.');
+  adminSec('users');
+}
+
+// ═══════════════════════════════════════════
+// CLIENT UI
+// ═══════════════════════════════════════════
+function buildClientUI(s){
+  const plan = s.plan || 'basico';
+  const isPro = plan==='pro'||plan==='business';
+  const isBiz = plan==='business';
+
+  document.getElementById('nav-links').innerHTML =
+    `<a class="on" id="na-dash" onclick="clientSec('dash')">Dashboard</a>
+     <a id="na-appts" onclick="clientSec('appts')" class="${isPro?'':'si disabled'}">Agendamentos</a>
+     <a id="na-link" onclick="clientSec('link')">Meu link</a>
+     <a id="na-plans" onclick="clientSec('plans')">Planos</a>
+     ${isBiz?`<a id="na-stats" onclick="clientSec('stats')">Estatísticas</a>`:''}`;
+
+  document.getElementById('sb-items').innerHTML =
+    `<div class="si on" id="sb-dash" onclick="clientSec('dash')">
+       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
+       Dashboard
+     </div>
+     <div class="si ${isPro?'':'disabled'}" id="sb-appts" onclick="${isPro?`clientSec('appts')`:'showUpgrade()'}">
+       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 1v3M11 1v3M1.5 6h13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+       Agendamentos ${!isPro?'🔒':''}
+     </div>
+     <div class="si" id="sb-link" onclick="clientSec('link')">
+       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.5 9.5l3-3M5 7.5L3.5 9a3 3 0 004.243 4.243L9.5 11.5M11 8.5l1.5-1.5a3 3 0 00-4.243-4.243L6.5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+       Meu link
+     </div>
+     <div class="si" id="sb-plans" onclick="clientSec('plans')">
+       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1l1.8 5H15l-4.2 3.1 1.6 5L8 11l-4.4 3.1 1.6-5L1 6h5.2L8 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+       Planos
+     </div>
+     ${isBiz?`<div class="si" id="sb-stats" onclick="clientSec('stats')">
+       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 12l4-4 3 3 5-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+       Estatísticas
+     </div>`:''}`;
+
+  clientSec('dash');
+
+  if(!s.paid){
+    if(wallTimer) clearInterval(wallTimer);
+    showWall();
+    wallTimer = setInterval(showWall, 60000);
+  } else {
+    clearWall();
+  }
+}
+
+function clientSec(id){
+  const s = gs();
+  const plan = s.plan||'basico';
+  const isPro = plan==='pro'||plan==='business';
+  const isBiz = plan==='business';
+
+  const allSecs = ['dash','appts','link','plans','stats'];
+  allSecs.forEach(sec=>{
+    const na=document.getElementById('na-'+sec);
+    const sb=document.getElementById('sb-'+sec);
+    if(na) na.classList.toggle('on', sec===id);
+    if(sb) sb.classList.toggle('on', sec===id);
+  });
+
+  const m = document.getElementById('main-area');
+  const appts = ga().filter(a=>a.slug===s.slug);
+  const today = new Date().toISOString().split('T')[0];
+
+  if(id==='dash'){
+    const planInfo = PLANS[plan]||PLANS.basico;
+    const lockBanner = !isPro ? `
+      <div class="lock-banner">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Estás no plano Básico (Grátis). Funcionalidades muito limitadas. Faz upgrade para desbloquear WhatsApp, lembretes, histórico e muito mais.
+        <button class="btn btn-a btn-sm" style="margin-left:auto;white-space:nowrap" onclick="clientSec('plans')">Ver planos</button>
+      </div>` : '';
+
+    m.innerHTML = `
+      ${lockBanner}
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+        <div>
+          <div style="font-size:20px;font-weight:600">Olá, ${s.name.split(' ')[0]}!</div>
+          <div style="font-size:13px;color:var(--muted)">${s.name} — Plano <span style="font-weight:600">${planInfo.label}</span></div>
+        </div>
+        <button class="btn btn-p" onclick="clientSec('link')">Ver meu link</button>
+      </div>
+      <div class="mgrid">
+        <div class="met"><div class="ml">Hoje</div><div class="mv">${appts.filter(a=>a.date===today).length}</div><div class="ms">agendamentos</div></div>
+        <div class="met"><div class="ml">Total</div><div class="mv">${appts.length}</div><div class="ms">marcações</div></div>
+        <div class="met" style="${!isPro?'opacity:.4;pointer-events:none':''}">
+          <div class="ml">Confirmados ${!isPro?'🔒':''}</div>
+          <div class="mv">${isPro?appts.filter(a=>a.status==='confirmado').length:'—'}</div>
+        </div>
+        <div class="met" style="${!isBiz?'opacity:.4;pointer-events:none':''}">
+          <div class="ml">Receita/mês ${!isBiz?'🔒':''}</div>
+          <div class="mv">${isBiz?appts.filter(a=>a.status!=='cancelado').reduce((s,a)=>s+(a.price||0),0).toLocaleString()+' MT':'—'}</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">Agendamentos recentes ${!isPro?'<span style="color:var(--warn);font-size:11px">(histórico bloqueado no plano Básico)</span>':''}</div>
+        ${isPro ? renderApptTable(appts.slice(-5).reverse()) : `<div style="padding:1.5rem;text-align:center;color:var(--muted);font-size:13px">Histórico de agendamentos disponível no plano Pro ou superior.<br><button class="btn btn-a btn-sm" style="margin-top:10px" onclick="clientSec('plans')">Fazer upgrade</button></div>`}
+      </div>`;
+  }
+
+  else if(id==='appts'){
+    if(!isPro){ showUpgrade(); return; }
+    const canCancel = isPro;
+    m.innerHTML = `
+      <div style="font-size:20px;font-weight:600;margin-bottom:1.5rem">Todos os agendamentos</div>
+      <div class="card">${renderApptTable(appts.slice().reverse(), canCancel, s.slug)}</div>`;
+  }
+
+  else if(id==='link'){
+    const link = `agendaja.co.mz/agendar/#/${s.slug}`;
+    m.innerHTML = `
+      <div style="font-size:20px;font-weight:600;margin-bottom:1.5rem">Meu link de agendamento</div>
+      
+      <div class="card">
+        <div class="ct">Personalização da página</div>
+        <div class="edit-group">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px">
+            <div>
+              <label style="font-size:12px;font-weight:600">Logotipo</label>
+              <input type="file" id="logo-upload" accept="image/*" onchange="uploadLogo(this)" style="margin-top:5px"/>
+              ${s.logo ? `<img src="${s.logo}" class="logo-preview" style="margin-top:10px"/>` : ''}
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:600">Nome da empresa</label>
+              <input type="text" id="edit-company-name" value="${s.name}" class="fld" style="margin-top:5px"/>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:15px">
+            <div>
+              <label style="font-size:12px;font-weight:600">Cor principal</label>
+              <div style="display:flex;gap:10px;align-items:center;margin-top:5px">
+                <input type="color" id="edit-brand-color" value="${s.brandColor || '#0A6B4F'}" style="width:50px;height:40px"/>
+                <span style="font-size:12px">${s.brandColor || '#0A6B4F'}</span>
+              </div>
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:600">Cor de destaque</label>
+              <div style="display:flex;gap:10px;align-items:center;margin-top:5px">
+                <input type="color" id="edit-accent-color" value="${s.accentColor || '#F5A623'}" style="width:50px;height:40px"/>
+                <span style="font-size:12px">${s.accentColor || '#F5A623'}</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-bottom:15px">
+            <label style="font-size:12px;font-weight:600">WhatsApp da empresa</label>
+            <input type="text" id="edit-phone" value="${s.phone || ''}" class="fld" style="margin-top:5px" placeholder="+258 84 000 0000"/>
+          </div>
+          <div style="margin-bottom:15px">
+            <label style="font-size:12px;font-weight:600">Endereço</label>
+            <input type="text" id="edit-address" value="${s.address || ''}" class="fld" style="margin-top:5px" placeholder="Endereço da empresa"/>
+          </div>
+          <button class="btn btn-p" onclick="saveCompanyProfile()">Salvar alterações</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="ct">Link público da tua empresa</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Partilha este link com os teus clientes. Eles abrem, escolhem serviço e hora.</p>
+        <div class="lbox">
+          <span class="lt" id="clink">${link}</span>
+          <button class="btn btn-o btn-sm" onclick="copyLink()">Copiar</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+          <button class="btn btn-p" onclick="previewBooking()">Ver como cliente</button>
+          <button class="btn btn-o" onclick="shareWA()">Partilhar no WhatsApp</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="ct">Os teus serviços ${!isPro?'<span style="color:var(--warn);font-size:11px">(máx. 1 serviço no plano Básico)</span>':isBiz?'<span style="color:var(--brand);font-size:11px">(ilimitados)</span>':'<span style="color:var(--muted);font-size:11px">(máx. 5 no plano Pro)</span>'}</div>
+        <div id="svc-list"></div>
+        <button class="btn btn-o btn-sm" style="margin-top:10px" onclick="addSvc()">+ Adicionar serviço</button>
+      </div>`;
+    renderSvcs();
+  }
+
+  else if(id==='plans'){
+    m.innerHTML = `
+      <div style="font-size:20px;font-weight:600;margin-bottom:1.5rem">Escolhe o teu plano</div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px">
+        ${buildPlanCards(plan)}
+      </div>`;
+  }
+
+  else if(id==='stats'){
+    if(!isBiz){ showUpgrade(); return; }
+    const byService = {};
+    appts.forEach(a=>{ byService[a.service]=(byService[a.service]||0)+1; });
+    const topSvc = Object.entries(byService).sort((a,b)=>b[1]-a[1]);
+    m.innerHTML = `
+      <div style="font-size:20px;font-weight:600;margin-bottom:1.5rem">Estatísticas avançadas</div>
+      <div class="mgrid">
+        <div class="met"><div class="ml">Total marcações</div><div class="mv">${appts.length}</div></div>
+        <div class="met"><div class="ml">Confirmadas</div><div class="mv">${appts.filter(a=>a.status==='confirmado').length}</div></div>
+        <div class="met"><div class="ml">Canceladas</div><div class="mv">${appts.filter(a=>a.status==='cancelado').length}</div></div>
+        <div class="met"><div class="ml">Receita total</div><div class="mv">${appts.filter(a=>a.status!=='cancelado').reduce((s,a)=>s+(a.price||0),0).toLocaleString()} MT</div></div>
+      </div>
+      <div class="card">
+        <div class="ct">Serviços mais agendados</div>
+        ${topSvc.length===0?`<div style="color:var(--muted);font-size:13px;padding:1rem 0">Sem dados ainda.</div>`:
+          topSvc.map(([svc,cnt])=>`
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <span style="flex:1;font-size:13px;font-weight:500">${svc}</span>
+            <div style="flex:2;height:7px;background:var(--bg);border-radius:4px;overflow:hidden">
+              <div style="height:100%;background:var(--brand);border-radius:4px;width:${Math.round(cnt/(topSvc[0][1]||1)*100)}%"></div>
+            </div>
+            <span style="font-size:13px;font-weight:600;min-width:24px">${cnt}</span>
+          </div>`).join('')}
+      </div>`;
+  }
+}
+
+function saveCompanyProfile(){
+  const s = gs();
+  const newName = document.getElementById('edit-company-name').value;
+  const newBrandColor = document.getElementById('edit-brand-color').value;
+  const newAccentColor = document.getElementById('edit-accent-color').value;
+  const newPhone = document.getElementById('edit-phone').value;
+  const newAddress = document.getElementById('edit-address').value;
+  
+  if(newName && newName !== s.name){
+    const newSlug = newName.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+    s.name = newName;
+    s.slug = newSlug;
+  }
+  
+  s.brandColor = newBrandColor;
+  s.accentColor = newAccentColor;
+  s.phone = newPhone;
+  s.address = newAddress;
+  
+  ss(s);
+  const users = gu();
+  const idx = users.findIndex(u=>u.email===s.email);
+  if(idx>-1){
+    users[idx] = {...users[idx], ...s};
+    su(users);
+  }
+  
+  applyBrandColors(s);
+  toast('Perfil atualizado com sucesso!');
+  clientSec('link');
+}
+
+function uploadLogo(input){
+  const file = input.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const s = gs();
+      s.logo = e.target.result;
+      ss(s);
+      const users = gu();
+      const idx = users.findIndex(u=>u.email===s.email);
+      if(idx>-1){
+        users[idx].logo = e.target.result;
+        su(users);
+      }
+      toast('Logotipo atualizado!');
+      clientSec('link');
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function renderApptTable(appts, canCancel=false, slug=''){
+  if(!appts.length) return `<div style="padding:1.5rem;text-align:center;color:var(--muted);font-size:13px">Nenhum agendamento ainda. Partilha o teu link!</div>`;
+  return `<div style="overflow-x:auto"><table>
+    <thead><tr><th>Data</th><th>Hora</th><th>Cliente</th><th>Serviço</th><th>Valor</th><th>Estado</th>${canCancel?'<th>Acção</th>':''}</tr></thead>
+    <tbody>${appts.map(a=>`<tr>
+      <td>${a.date||'—'}</td><td>${a.time||'—'}</td>
+      <td><div style="font-weight:500">${a.clientName||'—'}</div><div style="font-size:11px;color:var(--muted)">${a.clientPhone||''}</div></td>
+      <td>${a.service||'—'}</td>
+      <td>${a.price?a.price+' MT':'—'}</td>
+      <td><span class="st ${a.status==='confirmado'?'s-ok':a.status==='cancelado'?'s-can':'s-pend'}">${a.status||'pendente'}</span></td>
+      ${canCancel&&a.status!=='cancelado'?`<td><button class="btn btn-d btn-sm" onclick="cancelAppt(${a.id},'${slug}')">Cancelar</button></td>`:(canCancel?'<td>—</td>':'')}
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+
+function cancelAppt(id, slug){
+  const appts = ga();
+  const i = appts.findIndex(a=>a.id===id);
+  if(i>-1){ appts[i].status='cancelado'; sa(appts); }
+  toast('Agendamento cancelado.');
+  clientSec('appts');
+}
+
+function buildPlanCards(currentPlan){
+  return ['basico','pro','business'].map(pl=>{
+    const P = PLANS[pl];
+    const isCurrent = pl===currentPlan;
+    return `<div class="price-card ${pl==='pro'?'pop':''}">
+      ${pl==='pro'?`<div style="font-size:11px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem">Mais popular</div>`:''}
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem">${P.label}</div>
+      <div style="font-size:28px;font-weight:700;margin-bottom:.2rem">${P.price==='Grátis'?'0 MT':P.price.replace('/mês','')}</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:1rem">/mês</div>
+      <div style="font-size:13px;margin-bottom:1rem">
+        ${P.features.map(f=>`<div style="padding:5px 0;border-bottom:1px solid var(--border);display:flex;gap:6px;align-items:center"><span style="color:var(--brand);font-weight:700">✓</span>${f}</div>`).join('')}
+        ${P.locked.slice(0,3).map(f=>`<div style="padding:5px 0;border-bottom:1px solid var(--border);color:var(--muted);display:flex;gap:6px;align-items:center"><span>—</span>${f}</div>`).join('')}
+        ${P.locked.length>3?`<div style="padding:5px 0;color:var(--muted);font-size:12px">+${P.locked.length-3} funcionalidades bloqueadas</div>`:''}
+      </div>
+      ${isCurrent
+        ? `<button class="btn btn-o btn-full" disabled style="opacity:.5;cursor:not-allowed">Plano actual</button>`
+        : pl==='basico'
+          ? `<button class="btn btn-o btn-full" onclick="choosePlan('basico','0 MT')">Activar grátis</button>`
+          : `<button class="btn ${pl==='pro'?'btn-a':'btn-p'} btn-full" onclick="choosePlan('${pl}','${P.price}')">Assinar ${P.label}</button>`
+      }
+    </div>`;
+  }).join('');
+}
+
+function showUpgrade(){
+  toast('Esta funcionalidade requer um plano superior. Vai a Planos para fazer upgrade.');
+  clientSec('plans');
+}
+
+// ═══════════════════════════════════════════
+// PAYMENT WALL
+// ═══════════════════════════════════════════
+let wallPlan = 'basico';
+
+function showWall(){ document.getElementById('paywall').style.display='block'; }
+function clearWall(){ document.getElementById('paywall').style.display='none'; if(wallTimer){clearInterval(wallTimer);wallTimer=null;} }
+
+function selWall(el, plan){
+  document.querySelectorAll('.popt').forEach(p=>p.classList.remove('sel'));
+  el.classList.add('sel'); wallPlan = plan;
+  const btn = document.getElementById('pw-btn');
+  btn.innerHTML = plan==='basico' ? 'Activar conta grátis' : '💬 Pagar '+PLANS[plan].price+' via WhatsApp';
+  btn.className = 'btn btn-full '+(plan==='basico'?'btn-p':'btn-w');
+}
+
+function payViaWA(){
+  const s = gs();
+  if(wallPlan==='basico'){ activate('basico'); return; }
+  const P = PLANS[wallPlan];
+  const msg = encodeURIComponent(
+    `Olá! Quero activar o plano *${P.label}* (${P.price}) no AgendaJá.\n\n` +
+    `Empresa: *${s.name}*\nEmail: ${s.email}\nTelefone: ${s.phone||'—'}\n\nObrigado!`
+  );
+  window.open('https://wa.me/258869314426?text='+msg,'_blank');
+  toast('Mensagem enviada! Após confirmação do pagamento, o admin activa a tua conta.');
+}
+
+function activate(plan){
+  const s = gs(); s.paid=true; s.plan=plan; ss(s);
+  const us=gu(); const i=us.findIndex(u=>u.email===s.email);
+  if(i>-1){ us[i].paid=true; us[i].plan=plan; su(us); }
+  clearWall(); loadApp(); toast('Plano '+PLANS[plan].label+' activado!');
+}
+
+function choosePlan(plan, price){
+  const s = gs();
+  if(plan==='basico'){ activate('basico'); return; }
+  const msg = encodeURIComponent(
+    `Olá! Quero fazer upgrade para o plano *${PLANS[plan].label}* (${price}) no AgendaJá.\n\n` +
+    `Empresa: *${s.name}*\nEmail: ${s.email}\n\nObrigado!`
+  );
+  window.open('https://wa.me/258869314426?text='+msg,'_blank');
+}
+
+// ═══════════════════════════════════════════
+// SERVICES
+// ═══════════════════════════════════════════
+function renderSvcs(){
+  const s=gs(); const svcs=s.services||[];
+  const el=document.getElementById('svc-list');
+  if(!el) return;
+  if(!svcs.length){el.innerHTML='<div style="color:var(--muted);font-size:13px">Nenhum serviço ainda.</div>';return;}
+  el.innerHTML=svcs.map(sv=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div><div style="font-size:13px;font-weight:500">${sv.name}</div><div style="font-size:11px;color:var(--muted)">${sv.dur} min</div></div>
+      <div style="font-weight:600;color:var(--brand)">${sv.price} MT</div>
+    </div>`).join('');
+}
+
+function addSvc(){
+  const s=gs();
+  const plan=s.plan||'basico';
+  const svcs=s.services||[];
+  if(plan==='basico'&&svcs.length>=1){ toast('Plano Básico: máximo 1 serviço. Faz upgrade para Pro.'); return; }
+  if(plan==='pro'&&svcs.length>=5){ toast('Plano Pro: máximo 5 serviços. Faz upgrade para Business.'); return; }
+  const n=prompt('Nome do serviço:'); if(!n) return;
+  const p=parseInt(prompt('Preço em MT:')||'0');
+  const d=parseInt(prompt('Duração (min):')||'30');
+  s.services.push({id:Date.now(),name:n,price:p,dur:d}); ss(s);
+  const us=gu(); const i=us.findIndex(u=>u.email===s.email);
+  if(i>-1){us[i].services=s.services;su(us);}
+  renderSvcs(); toast('Serviço adicionado!');
+}
+
+// ═══════════════════════════════════════════
+// BOOKING PAGE
+// ═══════════════════════════════════════════
+function previewBooking(){
+  const s=gs();
+  ['bkn','bkn2','bkn3'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=s.name; });
+  
+  // Aplicar cores personalizadas na página de agendamento
+  const brandColor = s.brandColor || '#0A6B4F';
+  const headers = document.querySelectorAll('#booking-header, #booking-header2, #booking-header3');
+  headers.forEach(h => { if(h) h.style.background = brandColor; });
+  document.getElementById('booking-bg').style.background = 'var(--bg)';
+  
+  const svcs=s.services||[{name:'Serviço geral',price:300,dur:30}];
+  document.getElementById('bk-svcs').innerHTML=svcs.map(sv=>
+    `<div class="so" onclick="bkSel(this,'${sv.name}',${sv.price})">
+      <div><div style="font-size:14px;font-weight:500">${sv.name}</div><div style="font-size:12px;color:var(--muted)">${sv.dur} min</div></div>
+      <div style="font-weight:600;color:var(--brand)">${sv.price} MT</div>
+    </div>`).join('');
+  const d=document.getElementById('bk-date'); if(d) d.valueAsDate=new Date();
+  bkGo(1); showPage('booking');
+}
+
+function shareWA(){
+  const s=gs(); const link=document.getElementById('clink').textContent;
+  const msg=encodeURIComponent(`Pode agendar na *${s.name}* aqui:\nhttps://${link}`);
+  window.open('https://wa.me/?text='+msg,'_blank');
+}
+
+function copyLink(){
+  const link='https://'+document.getElementById('clink').textContent;
+  navigator.clipboard.writeText(link).then(()=>toast('Link copiado!')).catch(()=>toast('Copiado: '+link));
+}
+
+let bkSvc='',bkPr=0,bkTm='';
+function bkSel(el,n,p){document.querySelectorAll('.so').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');bkSvc=n;bkPr=p;}
+function bkTime(el){document.querySelectorAll('.to:not(.tk)').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');bkTm=el.textContent;}
+
+function bkGo(step){
+  document.querySelectorAll('#bks1,#bks2,#bks3,#bk-ok').forEach(e=>e.style.display='none');
+  const target = step==='ok' ? document.getElementById('bk-ok') : document.getElementById('bks'+step);
+  if(target) target.style.display='block';
+}
+
+function bkConfirm(){
+  const n=document.getElementById('bk-nm').value.trim();
+  const p=document.getElementById('bk-ph').value.trim();
+  if(!n||!p){toast('Preenche nome e telemóvel!');return;}
+  const s=gs(); const appts=ga();
+  const date=document.getElementById('bk-date')?.value||new Date().toISOString().split('T')[0];
+  appts.push({id:Date.now(),slug:s?s.slug:'demo',clientName:n,clientPhone:p,service:bkSvc||'Serviço',price:bkPr||0,date,time:bkTm||'—',status:'confirmado',at:new Date().toISOString()});
+  sa(appts); bkGo('ok');
+}
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function toast(msg,dur=3500){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+// Handle hash routing for booking page
+function handleHashRouting(){
+  const hash = window.location.hash;
+  if(hash && hash.startsWith('#/')){
+    const slug = hash.substring(2);
+    const users = gu();
+    const company = users.find(u => u.slug === slug);
+    if(company){
+      ss(company);
+      applyBrandColors(company);
+      previewBooking();
+    }
+  }
+}
+
+window.addEventListener('hashchange', handleHashRouting);
+
+// INIT
+const _s = gs();
+if(_s) loadApp(); else showPage('login');
+handleHashRouting();
+</script>
+</body>
+</html>
